@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <title>ระบบแจ้งซ่อมไฟฟ้าสาธารณะ(E-Streetlight & Tracking System)</title>
+
+  <style>
+
+    /* =========================================================
+       RESET
+       ========================================================= */
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+
+      overflow: hidden;
+
+      background: #ffffff;
+    }
+
+
+    /* =========================================================
+       CONFIGURATION
+       ========================================================= */
+
+    :root {
+
+      /*
+       * =======================================================
+       * จำนวน Pixel ที่ต้องการซ่อนจากด้านบนของ GAS
+       *
+       * แนะนำ:
+       *
+       *  0px  = ไม่ซ่อน
+       *  5px  = ซ่อน 5px
+       * 10px  = ซ่อน 10px
+       * 15px  = ซ่อน 15px
+       * 20px  = ซ่อน 20px
+       *
+       * ถ้าแถบสีเทาของ GAS สูงประมาณ 15px
+       * ให้ใช้ 15px
+       * =======================================================
+       */
+
+      --gas-hide-top: 15px;
+
+
+      /*
+       * =======================================================
+       * สีพื้นหลังของพื้นที่ครอบ iframe
+       * =======================================================
+       */
+
+      --iframe-bg: #ffffff;
+    }
+
+
+    /* =========================================================
+       FULL SCREEN CONTAINER
+       ========================================================= */
+
+    .iframe-container {
+
+      position: fixed;
+
+      inset: 0;
+
+      width: 100%;
+      height: 100%;
+
+      margin: 0;
+      padding: 0;
+
+      overflow: hidden;
+
+      background: var(--iframe-bg);
+
+      /*
+       * ป้องกันการเลือก iframe โดยไม่จำเป็น
+       */
+      isolation: isolate;
+    }
+
+
+    /* =========================================================
+       GAS FRAME
+       ========================================================= */
+
+    .gas-frame {
+
+      position: absolute;
+
+      /*
+       * =======================================================
+       * เลื่อน GAS ขึ้น
+       *
+       * เช่น 15px
+       *
+       * ส่วนบน 15px จะถูกเลื่อนออกนอกพื้นที่ Wrapper
+       * =======================================================
+       */
+
+      top: calc(var(--gas-hide-top) * -1);
+
+      left: 0;
+
+      /*
+       * =======================================================
+       * ความกว้างเต็มพื้นที่
+       * =======================================================
+       */
+
+      width: 100%;
+
+      /*
+       * =======================================================
+       * เพิ่มความสูงชดเชยส่วนที่ถูกเลื่อนขึ้น
+       *
+       * เพื่อไม่ให้เกิดพื้นที่ว่างด้านล่าง
+       * =======================================================
+       */
+
+      height: calc(100% + var(--gas-hide-top));
+
+      margin: 0;
+      padding: 0;
+
+      border: 0;
+
+      display: block;
+
+      background: #ffffff;
+
+      /*
+       * ป้องกันการแสดง outline เมื่อ iframe ถูก focus
+       */
+      outline: none;
+    }
+
+
+    /* =========================================================
+       DESKTOP
+       ========================================================= */
+
+    @media screen and (min-width: 769px) {
+
+      :root {
+        --gas-hide-top: 15px;
+      }
+
+    }
+
+
+    /* =========================================================
+       TABLET / MOBILE
+       ========================================================= */
+
+    @media screen and (max-width: 768px) {
+
+      :root {
+        --gas-hide-top: 8px;
+      }
+
+    }
+
+
+    /* =========================================================
+       SMALL MOBILE
+       ========================================================= */
+
+    @media screen and (max-width: 480px) {
+
+      :root {
+        --gas-hide-top: 6px;
+      }
+
+    }
+
+
+    /* =========================================================
+       LANDSCAPE MOBILE
+       ========================================================= */
+
+    @media screen and (max-width: 900px)
+      and (orientation: landscape) {
+
+      :root {
+        --gas-hide-top: 8px;
+      }
+
+    }
+
+
+    /* =========================================================
+       SAFARI / IOS
+       ========================================================= */
+
+    @supports (-webkit-touch-callout: none) {
+
+      .iframe-container {
+        height: 100dvh;
+      }
+
+      .gas-frame {
+        height: calc(100dvh + var(--gas-hide-top));
+      }
+
+    }
+
+
+    /* =========================================================
+       MODERN MOBILE VIEWPORT
+       ========================================================= */
+
+    @supports (height: 100dvh) {
+
+      .iframe-container {
+        height: 100dvh;
+      }
+
+      .gas-frame {
+        height: calc(100dvh + var(--gas-hide-top));
+      }
+
+    }
+
+
+    /* =========================================================
+       HIDE SCROLLBAR OF OUTER PAGE
+       ========================================================= */
+
+    html,
+    body,
+    .iframe-container {
+
+      scrollbar-width: none;
+
+      -ms-overflow-style: none;
+    }
+
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    .iframe-container::-webkit-scrollbar {
+
+      width: 0;
+      height: 0;
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+  <!-- =======================================================
+       IFRAME CONTAINER
+       ======================================================= -->
+
+  <main
+    class="iframe-container"
+    aria-label="E-Donation & Tracking System"
+  >
+
+    <iframe
+      id="gasFrame"
+      class="gas-frame"
+
+      src="https://script.google.com/macros/s/AKfycbyWT9IeBXoIzRUK3t6GExqX7LfKtOR5FlFm64SIoP_Vob8CYDb-tMadJbndwx1rSoXO/exec"
+
+     
+
+      title="E-Donation & Tracking System"
+
+      frameborder="0"
+
+      scrolling="auto"
+
+      allow="fullscreen"
+
+      loading="eager"
+
+      referrerpolicy="strict-origin-when-cross-origin">
+    </iframe>
+
+  </main>
+
+
+  <script>
+
+    /* =========================================================
+       VIEWPORT HEIGHT CONTROL
+       =========================================================
+
+       ใช้สำหรับมือถือที่ Browser มี Address Bar
+       ซึ่งอาจทำให้ 100vh มีความสูงคลาดเคลื่อน
+       ========================================================= */
+
+    (function () {
+
+      function updateViewportHeight() {
+
+        const height = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
+
+        document.documentElement.style.setProperty(
+          "--viewport-height",
+          height + "px"
+        );
+
+      }
+
+
+      /*
+       * เรียกครั้งแรก
+       */
+
+      updateViewportHeight();
+
+
+      /*
+       * เมื่อขนาดหน้าจอเปลี่ยน
+       */
+
+      window.addEventListener(
+        "resize",
+        updateViewportHeight,
+        { passive: true }
+      );
+
+
+      /*
+       * รองรับ Mobile Browser
+       */
+
+      if (window.visualViewport) {
+
+        window.visualViewport.addEventListener(
+          "resize",
+          updateViewportHeight,
+          { passive: true }
+        );
+
+      }
+
+    })();
+
+  </script>
+
+</body>
+</html>
+
